@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <time.h>
 #include "uthread.h"
 #include "uthread_mutex_cond.h"
 
@@ -127,8 +128,7 @@ int tryEnter(enum GenderIdentity g){
 	uthread_mutex_unlock(w_lock);						// release washroom mutex
 }
 void * person (void* av) {
-	intptr_t z = (intptr_t) av;
-	intptr_t i = z % 2;							// even numbers are male, odds are female
+	intptr_t i = (intptr_t) av;						// even numbers are male, odds are female
 	for (int k = 0; k < NUM_ITERATIONS; k++){				// will enter the washroom NUM_ITERATIONS times
 		tryEnter(i);
 		for(int n=0; n < NUM_PEOPLE; n++){				// after successfully entering the washroom, yields -
@@ -149,9 +149,9 @@ int main (int argc, char** argv) {
   	waitingHistogramMutex = uthread_mutex_create ();
   	w_lock = uthread_mutex_create();					// create mutexes and condition variable
   	spot_open = uthread_cond_create(w_lock);
-
+	srand(time(0));
   	for (int i=0; i<NUM_PEOPLE; i++){
-		int r = random() % 100;						// generate random number, create male if r is even, else female
+		int r = rand() % 2;						// generate random number, create male if r is even, else female
 		uthread_t u = uthread_create(person, (void*) (intptr_t) r);	// create thread that will be the person trying to enter washroom
 		pt[i] = u;							// add thread to array
   	}
